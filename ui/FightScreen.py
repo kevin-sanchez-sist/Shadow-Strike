@@ -45,7 +45,7 @@ def fight_screen(screen, personaje):
                     knight.set_action('run')
 
             elif movement == 'jump' and knight.on_ground:
-                knight.vel_y = -30
+                knight.vel_y = -40
                 knight.on_ground = False
                 knight.set_action('jump')
 

@@ -25,7 +25,7 @@ class Fighter:
         self.frame_durations = {
             'idle':         100,
             'run':          90,
-            'jump':         15,   # más rápido
+            'jump':         90,   # más rápido
             'attack':       80,
             'attack_extra': 120,
             'hurt':         20,
