@@ -1,7 +1,7 @@
 import pygame
 
-GRAVITY = 0.5
-GROUND_Y = 300  # Se debe ajustar de acuerdo al escenario
+GRAVITY = 5
+GROUND_Y = 450  # Se debe ajustar de acuerdo al escenario
 
 class Fighter:
     def __init__(self, name: str, x: int, y: int, sprites: dict, stats: dict, facing: str = 'right'):
@@ -22,7 +22,16 @@ class Fighter:
         self.action       = 'idle'
         self.frame_index  = 0
         self.frame_timer  = 0
-        self.frame_duration = 150          # ms por frame, ajustable por acción
+        self.frame_durations = {
+            'idle':         100,
+            'run':          90,
+            'jump':         15,   # más rápido
+            'attack':       80,
+            'attack_extra': 120,
+            'hurt':         20,
+            'death':        60,
+        }
+        self.frame_duration = 150         # ms por frame, ajustable por acción
 
         # --- Física ---
         self.vel_x    = 0.0
@@ -52,14 +61,15 @@ class Fighter:
 
     def update_animation(self, delta_time: int):
         self.frame_timer += delta_time
-        if self.frame_timer >= self.frame_duration:
+        duration = self.frame_durations.get(self.action, self.frame_duration)  # <- este cambio
+        if self.frame_timer >= duration:
             self.frame_timer = 0
             self.frame_index += 1
             frames = self.sprites[self.action]
 
             if self.frame_index >= len(frames):
                 self._on_animation_end()
-    
+        
     def _on_animation_end(self):
         """Cada personaje define qué hacer al terminar una animación."""
         self.frame_index = 0  # comportamiento por defecto: loop
@@ -143,3 +153,5 @@ class Fighter:
             frame = pygame.transform.flip(frame, True, False)
 
         screen.blit(frame, self.rect.topleft)
+        # DEBUG COLLIDER - eliminar cuando no se necesite
+        pygame.draw.rect(screen, (0, 255, 0), self.rect, 2)
