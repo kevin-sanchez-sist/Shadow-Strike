@@ -25,14 +25,15 @@ KNIGHT_STATS = {
 KNIGHT_ACTIONS = ['idle', 'run', 'jump', 'attack', 'attack_extra', 'hurt', 'death']
 
 class Knight(Fighter):
-    def __init__(self, x: int, y: int, sprites: dict, facing: str = 'right'):
+    def __init__(self, x: int, y: int, sprites: dict, facing: str = 'right', sounds: dict = None):
         super().__init__(
             name='Knight',
             x=x,
             y=y,
             sprites=sprites,
             stats=KNIGHT_STATS,
-            facing=facing
+            facing=facing,
+            sounds=sounds,
         )
     
     def _on_animation_end(self):

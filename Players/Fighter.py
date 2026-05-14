@@ -3,25 +3,32 @@ import pygame
 GRAVITY = 5
 GROUND_Y = 450  # Se debe ajustar de acuerdo al escenario
 
+
 class Fighter:
-    def __init__(self, name: str, x: int, y: int, sprites: dict, stats: dict, facing: str = 'right'):
+    def __init__(self, name: str, x: int, y: int, sprites: dict, stats: dict, facing: str = 'right', sounds: dict = None):
         self.name = name
         self.x = float(x)
         self.y = float(y)
         self.facing = facing  # 'right' o 'left'
 
+        # --- Sonidos ---
+        # { 'attack': Sound, 'attack_extra': Sound, 'death': Sound, ... }
+        self.sounds = sounds or {}
+
         # --- Stats ---
-        self.max_hp   = stats['max_hp']
-        self.hp       = stats['max_hp']
-        self.speed    = stats['speed']
-        self.defense  = stats['defense']
-        self.attacks  = stats['attacks']  # lista de dicts con info de cada ataque
+        self.max_hp = stats['max_hp']
+        self.hp = stats['max_hp']
+        self.speed = stats['speed']
+        self.defense = stats['defense']
+        # lista de dicts con info de cada ataque
+        self.attacks = stats['attacks']
 
         # --- Sprites y animación ---
-        self.sprites      = sprites        # { 'idle': [surf, ...], 'walk': [...], ... }
-        self.action       = 'idle'
-        self.frame_index  = 0
-        self.frame_timer  = 0
+        # { 'idle': [surf, ...], 'walk': [...], ... }
+        self.sprites = sprites
+        self.action = 'idle'
+        self.frame_index = 0
+        self.frame_timer = 0
         self.frame_durations = {
             'idle':         100,
             'run':          90,
@@ -34,14 +41,14 @@ class Fighter:
         self.frame_duration = 150         # ms por frame, ajustable por acción
 
         # --- Física ---
-        self.vel_x    = 0.0
-        self.vel_y    = 0.0
+        self.vel_x = 0.0
+        self.vel_y = 0.0
         self.on_ground = True
 
         # --- Estado ---
-        self.is_alive       = True
-        self.is_attacking   = False
-        self.is_hurt        = False
+        self.is_alive = True
+        self.is_attacking = False
+        self.is_hurt = False
         self.cooldown_timer = 0
 
         # --- Rect de colisión (se actualiza cada frame) ---
@@ -61,7 +68,8 @@ class Fighter:
 
     def update_animation(self, delta_time: int):
         self.frame_timer += delta_time
-        duration = self.frame_durations.get(self.action, self.frame_duration)  # <- este cambio
+        duration = self.frame_durations.get(
+            self.action, self.frame_duration)  # <- este cambio
         if self.frame_timer >= duration:
             self.frame_timer = 0
             self.frame_index += 1
@@ -69,7 +77,7 @@ class Fighter:
 
             if self.frame_index >= len(frames):
                 self._on_animation_end()
-        
+
     def _on_animation_end(self):
         """Cada personaje define qué hacer al terminar una animación."""
         self.frame_index = 0  # comportamiento por defecto: loop
@@ -86,7 +94,7 @@ class Fighter:
         self.x += self.vel_x
         self.y += self.vel_y
 
-         # Límites horizontales
+        # Límites horizontales
         if self.x < 0:
             self.x = 0
             self.vel_x = 0
@@ -113,6 +121,7 @@ class Fighter:
         self.is_hurt = True
         self.set_action('hurt')
         if self.hp == 0:
+            self.play_sound('death')
             self.set_action('death')
 
     def attack(self, attack_index: int = 0) -> dict | None:
@@ -125,8 +134,15 @@ class Fighter:
         attack_data = self.attacks[attack_index]
         self.is_attacking = True
         self.cooldown_timer = attack_data['cooldown']
+        self.play_sound(attack_data['action'])  # sonido del ataque
         self.set_action(attack_data['action'])
         return attack_data
+
+    def play_sound(self, action: str):
+        """Reproduce el sonido asociado a una acción, si existe."""
+        sound = self.sounds.get(action)
+        if sound:
+            sound.play()
 
     def update_cooldown(self, delta_time: int):
         if self.cooldown_timer > 0:

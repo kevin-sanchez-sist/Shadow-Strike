@@ -3,6 +3,7 @@ import pygame
 from ui.LoadingScreen import loading_screen
 from ui.menu import menu
 from ui.CharacterSelect import character_select
+from ui.MapSelect import map_select
 from ui.FightScreen import fight_screen
 
 pygame.init()
@@ -19,5 +20,17 @@ while True:
     if opcion == 'character_select':
         personaje = character_select(screen)
 
+        if personaje is None:
+            continue  # usuario cerró la ventana
+
+        # ── Selección de mapa ────────────────────────────────────────────
+        mapa = map_select(screen)
+
+        if mapa is None:
+            continue  # usuario cerró la ventana o presionó ESC
+
+        # ── Combate ──────────────────────────────────────────────────────
         if personaje == 'knight':
-            fight_screen(screen, personaje)
+            fight_screen(screen, personaje, mapa)
+        elif personaje == 'rogue':
+            fight_screen(screen, personaje, mapa)
