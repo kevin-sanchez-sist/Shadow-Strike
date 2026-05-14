@@ -1,42 +1,53 @@
+# ui/menu.py
 import pygame
 import sys
+from vision.HandCursor import HandCursor
 
 
 def menu(screen):
     imagen = pygame.image.load("Image\\Menu.png")
     imagen = pygame.transform.scale(imagen, screen.get_size())
 
-    # Música de ambiente del menú (loop infinito)
     pygame.mixer.music.load("sounds/menu_musica.wav")
     pygame.mixer.music.set_volume(0.5)
-    pygame.mixer.music.play(-1)  # -1 = loop infinito
+    pygame.mixer.music.play(-1)
 
+    cursor = HandCursor()
+    clock  = pygame.time.Clock()
+    W, H   = screen.get_size()
+    result = None
     running = True
+
     while running:
-        screen.blit(imagen, (0, 0))
+        delta_time = clock.tick(60)
+        cursor.update(delta_time)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                cursor.release()
                 pygame.mixer.music.stop()
                 pygame.quit()
                 sys.exit()
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                pos = pygame.mouse.get_pos()
-                print(pos)
+        pos = cursor.get_position(W, H)
+        if pos and cursor.consume_click():
+            px, py = pos
+            if 402 < px < 880 and 382 < py < 451:
+                result = 'character_select'
+                running = False
+            elif 400 < px < 870 and 560 < py < 615:
+                cursor.release()
+                pygame.mixer.music.stop()
+                pygame.quit()
+                sys.exit()
+            elif 418 < px < 866 and 395 < py < 468:
+                result = 'ayuda'
+                running = False
 
-                # Boton Jugar
-                if 402 < pos[0] < 880 and 382 < pos[1] < 451:
-                    return 'character_select'
-
-                # Boton Ayuda
-                if 418 < pos[0] < 866 and 395 < pos[1] < 468:
-                    return 'ayuda'
-
-                # Boton Salir
-                if 400 < pos[0] < 870 and 560 < pos[1] < 615:
-                    pygame.mixer.music.stop()
-                    pygame.quit()
-                    sys.exit()
-
+        screen.blit(imagen, (0, 0))
+        cursor.draw_on(screen, W, H)
+        cursor.show_camera()
         pygame.display.flip()
+
+    cursor.release()
+    return result

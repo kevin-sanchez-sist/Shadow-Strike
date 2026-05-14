@@ -23,14 +23,13 @@ ROGUE_STATS = {
 }
 
 # Acciones implementadas (Climb, Push, Walk, Run_Attack, Walk_Attack excluidas por ahora)
-ROGUE_ACTIONS = ['idle', 'run', 'jump', 'high_jump', 'attack', 'attack_extra', 'hurt', 'death']
+ROGUE_ACTIONS = ['idle', 'run', 'jump', 'attack', 'attack_extra', 'hurt', 'death']
 
 # Mapeo: nombre de acción interno → nombre de carpeta real en Sprites/Rogue/
 ROGUE_FOLDER_MAP = {
     'idle':         'Idle',
     'run':          'Run',
     'jump':         'Jump',
-    'high_jump':    'High_Jump',
     'attack':       'Attack',
     'attack_extra': 'Attack_Extra',
     'hurt':         'Hurt',
