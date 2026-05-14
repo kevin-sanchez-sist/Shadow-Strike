@@ -1,10 +1,14 @@
 # ui/FightScreen.py
+import random
 import pygame
 import sys
 from utils.sprite_loader import load_all_actions
+from utils.Combat import check_hit
 from Players.Knight import Knight, KNIGHT_ACTIONS
 from Players.Rogue import Rogue, ROGUE_ACTIONS, ROGUE_FOLDER_MAP
+from Players.EnemyAI import EnemyAI
 from vision.PoseTracker import PoseTracker
+from ui.HUD import draw_hud
 
 # ── Fondos por mapa ──────────────────────────────────────────────────────────
 MAP_BACKGROUNDS = {
@@ -88,6 +92,24 @@ def fight_screen(screen, personaje, mapa='templo'):
     )
     player = cfg['class'](x=cfg['spawn_x'], y=cfg['spawn_y'],
                           sprites=sprites, sounds=cfg['sounds'])
+    # ── Enemigo aleatorio ─────────────────────────────────────────────────────
+    enemy_key = random.choice([k for k in char_config if k != personaje])
+    ecfg = char_config[enemy_key]
+    enemy_sprites = load_all_actions(
+        "Sprites",
+        ecfg['folder'],
+        ecfg['actions'],
+        scale=ecfg['scale'],
+        folder_map=ecfg['folder_map'],
+    )
+    enemy = ecfg['class'](
+        x=1100,
+        y=450,
+        sprites=enemy_sprites,
+        facing='left',
+        sounds=ecfg['sounds'],
+    )
+    ai = EnemyAI()
 
     # ── Sistemas ─────────────────────────────────────────────────────────────
     tracker = PoseTracker()
@@ -140,8 +162,30 @@ def fight_screen(screen, personaje, mapa='templo'):
                 player.attack(attack_index=1)
 
         player.update(delta_time)
+        ai.update(enemy, player, delta_time)
+        ai.apply(enemy, player)
+        enemy.update(delta_time)
+
+        # El jugador golpea al enemigo
+        if check_hit(player, enemy):
+            attack_data = next(
+                (a for a in player.attacks if a['action'] == player.action), None
+            )
+            if attack_data:
+                enemy.take_damage(attack_data['damage'])
+
+        # El enemigo golpea al jugador
+        if check_hit(enemy, player):
+            attack_data = next(
+                (a for a in enemy.attacks if a['action'] == enemy.action), None
+            )
+            if attack_data:
+                player.take_damage(attack_data['damage'])
+
         screen.blit(fondo, (0, 0))
         player.draw(screen)
+        enemy.draw(screen)
+        draw_hud(screen, player, enemy)
         pygame.display.flip()
 
     tracker.release()
