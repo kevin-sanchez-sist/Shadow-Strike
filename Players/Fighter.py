@@ -46,6 +46,7 @@ class Fighter:
         self.on_ground = True
 
         # --- Estado ---
+        self.hit_landed = False
         self.is_alive = True
         self.is_attacking = False
         self.is_hurt = False
@@ -129,6 +130,7 @@ class Fighter:
         Intenta ejecutar un ataque.
         Retorna el dict del ataque si es válido, None si está en cooldown.
         """
+        self.hit_landed = False
         if self.cooldown_timer > 0 or self.is_hurt or not self.is_alive:
             return None
         attack_data = self.attacks[attack_index]

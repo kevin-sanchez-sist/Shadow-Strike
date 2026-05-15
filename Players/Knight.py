@@ -1,7 +1,7 @@
 from Players.Fighter import Fighter
 
 KNIGHT_STATS = {
-    'max_hp': 150,
+    'max_hp': 550,
     'speed': 10,
     'defense': 3,
     'attacks': [
@@ -10,7 +10,7 @@ KNIGHT_STATS = {
             'action': 'attack',
             'damage': 15,
             'range': 80,
-            'cooldown': 500,
+            'cooldown': 700,
         },
         {
             'name': 'Attack_Extra',
@@ -46,6 +46,7 @@ class Knight(Fighter):
         elif self.action in ('attack', 'attack_extra', 'hurt'):
             self.is_attacking = False
             self.is_hurt = False
+            self.hit_landed = False
             self.set_action('idle')
 
         else:  # idle, run, jump → loop

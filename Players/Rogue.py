@@ -1,8 +1,8 @@
 from Players.Fighter import Fighter
 
 ROGUE_STATS = {
-    'max_hp': 110,          # más frágil que el Knight
-    'speed': 14,            # más rápido
+    'max_hp': 410,          # más frágil que el Knight
+    'speed': 20,            # más rápido
     'defense': 1,
     'attacks': [
         {
@@ -15,7 +15,7 @@ ROGUE_STATS = {
         {
             'name': 'Attack_Extra',
             'action': 'attack_extra',
-            'damage': 28,
+            'damage': 38,
             'range': 90,
             'cooldown': 1000,
         },
@@ -70,6 +70,7 @@ class Rogue(Fighter):
         elif self.action in ('attack', 'attack_extra', 'hurt'):
             self.is_attacking = False
             self.is_hurt = False
+            self.hit_landed = False
             self.set_action('idle')
 
         else:   # idle, run, jump, high_jump → loop
