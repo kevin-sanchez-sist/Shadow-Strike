@@ -11,4 +11,4 @@ def recortar_transparente(carpeta):
                 img.save(path)
                 print(f"Recortado: {path}")
 
-recortar_transparente("Sprites\Knight")
+recortar_transparente("Sprites\Mage")

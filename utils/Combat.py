@@ -20,3 +20,24 @@ def check_hit(attacker, defender):
         return True
 
     return False
+
+def check_projectile_hits(attacker, defender):
+    """
+    Revisa si algún proyectil del atacante colisiona con el defensor.
+    Solo aplica si el atacante tiene proyectiles (Mage).
+    Retorna el daño total recibido (0 si no hay colisión).
+    """
+    if not hasattr(attacker, 'projectiles'):
+        return 0
+    if not defender.is_alive:
+        return 0
+
+    total_damage = 0
+    for proj in attacker.projectiles:
+        if not proj.active:
+            continue
+        if proj.rect.colliderect(defender.rect):
+            total_damage += proj.damage
+            proj.active = False   # desaparece al colisionar
+
+    return total_damage

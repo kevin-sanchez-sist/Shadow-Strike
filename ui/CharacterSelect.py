@@ -26,6 +26,7 @@ def character_select(screen):
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 px, py = pygame.mouse.get_pos()
+                print(f"{px}, {py}")
                 if 219 < px < 450 and 330 < py < 568:
                     result = 'knight'
                     running = False
@@ -41,6 +42,9 @@ def character_select(screen):
                 running = False
             elif 829 < px < 1061 and 331 < py < 567:
                 result = 'rogue'
+                running = False
+            if 526 < px < 753 and 330 < py < 568:
+                result = 'mage'
                 running = False
 
         screen.blit(imagen, (0, 0))

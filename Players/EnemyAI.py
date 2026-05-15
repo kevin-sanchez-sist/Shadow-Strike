@@ -2,10 +2,10 @@
 import random
 
 # ── Configuración de dificultad MEDIO ────────────────────────────────────────
-ATTACK_RANGE        = 90    # distancia horizontal para intentar atacar
+ATTACK_RANGE        = 120    # distancia horizontal para intentar atacar
 RETREAT_RANGE       = 50    # distancia mínima antes de retroceder
 DECISION_INTERVAL   = 600   # ms entre cada "pensamiento" del enemigo
-MISTAKE_CHANCE      = 0.25  # 25% de probabilidad de tomar una decisión mala
+MISTAKE_CHANCE      = 0.15  # 15% de probabilidad de tomar una decisión mala
 JUMP_CHANCE = 0.15 #15% de probabilidad de saltar al tomar una decisión
 
 STATES = ['idle', 'chase', 'attack', 'retreat']
@@ -40,7 +40,7 @@ class EnemyAI:
     def _decide(self, enemy, player):
         # Con MISTAKE_CHANCE el enemigo toma una decisión aleatoria (errores humanos)
         if random.random() < MISTAKE_CHANCE:
-            self.state = random.choice(STATES)
+            self.state = random.choice(['chase', 'attack', 'retreat'])
             return
 
         dist = abs(enemy.x - player.x)
@@ -61,6 +61,7 @@ class EnemyAI:
             self.state = 'attack'
             # Ocasionalmente usa ataque especial si lo tiene
             self.attack_index = 1 if random.random() < 0.3 else 0
+            self.decision_timer = 300
 
         else:
             self.state = 'chase'

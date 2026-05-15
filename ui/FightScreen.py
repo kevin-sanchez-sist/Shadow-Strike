@@ -2,10 +2,11 @@
 import random
 import pygame
 import sys
-from utils.sprite_loader import load_all_actions
-from utils.Combat import check_hit
+from utils.sprite_loader import load_all_actions, load_action_frames
+from utils.Combat import check_hit, check_projectile_hits
 from Players.Knight import Knight, KNIGHT_ACTIONS
 from Players.Rogue import Rogue, ROGUE_ACTIONS, ROGUE_FOLDER_MAP
+from Players.Mage import Mage, MAGE_ACTIONS, MAGE_FOLDER_MAP
 from Players.EnemyAI import EnemyAI
 from vision.PoseTracker import PoseTracker
 from ui.HUD import draw_hud
@@ -56,7 +57,21 @@ def get_character_config():
             'spawn_x':    100,
             'spawn_y':    450,
             'sounds': {
-                'attack':       pygame.mixer.Sound("sounds/ninja.wav"),
+                'attack':       pygame.mixer.Sound("sounds/bola_fuego.wav"),
+                'attack_extra': pygame.mixer.Sound("sounds/bola_fuego.wav"),
+                'death':        death_sound,
+            }
+        },
+        'mage': {
+            'folder':     'Mage',
+            'actions':    MAGE_ACTIONS,
+            'folder_map': MAGE_FOLDER_MAP,
+            'scale':      2.5,
+            'class':      Mage,
+            'spawn_x':    100,
+            'spawn_y':    450,
+            'sounds': {
+                'attack':       pygame.mixer.Sound("sounds/ninja.wav"),  # reemplaza con el sonido del mago cuando lo tengas
                 'attack_extra': pygame.mixer.Sound("sounds/ninja.wav"),
                 'death':        death_sound,
             }
@@ -91,8 +106,19 @@ def fight_screen(screen, personaje, mapa='templo'):
         scale=cfg['scale'],
         folder_map=cfg['folder_map'],
     )
-    player = cfg['class'](x=cfg['spawn_x'], y=cfg['spawn_y'],
-                          sprites=sprites, sounds=cfg['sounds'])
+    if cfg['class'] == Mage:
+        fire_frames = load_action_frames("Sprites", "Mage", "Fire",
+                                        scale=cfg['scale'], folder_name="Fire")
+        fire_extra_frames = load_action_frames("Sprites", "Mage", "Fire_Extra",
+                                            scale=cfg['scale'], folder_name="Fire_Extra")
+        player = Mage(x=cfg['spawn_x'], y=cfg['spawn_y'],
+                    sprites=sprites,
+                    fire_frames=fire_frames,
+                    fire_extra_frames=fire_extra_frames,
+                    sounds=cfg['sounds'])
+    else:
+        player = cfg['class'](x=cfg['spawn_x'], y=cfg['spawn_y'],
+                            sprites=sprites, sounds=cfg['sounds'])
     # ── Enemigo aleatorio ─────────────────────────────────────────────────────
     enemy_key = random.choice([k for k in char_config if k != personaje])
     ecfg = char_config[enemy_key]
@@ -103,13 +129,22 @@ def fight_screen(screen, personaje, mapa='templo'):
         scale=ecfg['scale'],
         folder_map=ecfg['folder_map'],
     )
-    enemy = ecfg['class'](
-        x=1100,
-        y=450,
-        sprites=enemy_sprites,
-        facing='left',
-        sounds=ecfg['sounds'],
-    )
+    if ecfg['class'] == Mage:
+        fire_frames = load_action_frames("Sprites", "Mage", "Fire",
+                                        scale=ecfg['scale'], folder_name="Fire")
+        fire_extra_frames = load_action_frames("Sprites", "Mage", "Fire_Extra",
+                                            scale=ecfg['scale'], folder_name="Fire_Extra")
+        enemy = Mage(x=1100, y=450,
+                    sprites=enemy_sprites,
+                    fire_frames=fire_frames,
+                    fire_extra_frames=fire_extra_frames,
+                    facing='left',
+                    sounds=ecfg['sounds'])
+    else:
+        enemy = ecfg['class'](x=1100, y=450,
+                            sprites=enemy_sprites,
+                            facing='left',
+                            sounds=ecfg['sounds'])
     ai = EnemyAI()
 
     # ── Sistemas ─────────────────────────────────────────────────────────────
@@ -195,6 +230,16 @@ def fight_screen(screen, personaje, mapa='templo'):
             )
             if attack_data:
                 player.take_damage(attack_data['damage'])
+        
+        # Proyectiles del jugador → enemigo
+        dmg = check_projectile_hits(player, enemy)
+        if dmg > 0:
+            enemy.take_damage(dmg)
+
+        # Proyectiles del enemigo → jugador
+        dmg = check_projectile_hits(enemy, player)
+        if dmg > 0:
+            player.take_damage(dmg)
 
         screen.blit(fondo, (0, 0))
         player.draw(screen)

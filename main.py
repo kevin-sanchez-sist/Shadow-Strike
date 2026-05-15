@@ -30,7 +30,4 @@ while True:
             continue  # usuario cerró la ventana o presionó ESC
 
         # ── Combate ──────────────────────────────────────────────────────
-        if personaje == 'knight':
-            fight_screen(screen, personaje, mapa)
-        elif personaje == 'rogue':
-            fight_screen(screen, personaje, mapa)
+        fight_screen(screen, personaje, mapa)
