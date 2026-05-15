@@ -2,6 +2,7 @@
 import pygame
 import sys
 from vision.HandCursor import HandCursor
+from ui.InstructionScreen import instruction_screen
 
 
 def menu(screen):
@@ -40,9 +41,10 @@ def menu(screen):
                 pygame.mixer.music.stop()
                 pygame.quit()
                 sys.exit()
-            elif 418 < px < 866 and 395 < py < 468:
-                result = 'ayuda'
-                running = False
+            elif 418 < px < 866 and 460 < py < 555:
+                cursor.release()
+                instruction_screen(screen)
+                return menu(screen)   # vuelve al menú después de cerrar instrucciones
 
         screen.blit(imagen, (0, 0))
         cursor.draw_on(screen, W, H)
