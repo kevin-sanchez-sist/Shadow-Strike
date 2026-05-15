@@ -9,6 +9,7 @@ from Players.Rogue import Rogue, ROGUE_ACTIONS, ROGUE_FOLDER_MAP
 from Players.EnemyAI import EnemyAI
 from vision.PoseTracker import PoseTracker
 from ui.HUD import draw_hud
+from ui.ResultScreen import result_screen
 
 # ── Fondos por mapa ──────────────────────────────────────────────────────────
 MAP_BACKGROUNDS = {
@@ -161,10 +162,23 @@ def fight_screen(screen, personaje, mapa='templo'):
             elif action == 'special':
                 player.attack(attack_index=1)
 
-        player.update(delta_time)
+        if player.hp == 0 or enemy.hp == 0:
+            slow_delta = delta_time // 4
+            player.update(slow_delta)
+            enemy.update(slow_delta)
+        else:
+            player.update(delta_time)
+            enemy.update(delta_time)
+        
+        if not player.is_alive:
+            result_screen(screen, won=False)
+            return
+        if not enemy.is_alive:
+            result_screen(screen, won=True)
+            return
+
         ai.update(enemy, player, delta_time)
         ai.apply(enemy, player)
-        enemy.update(delta_time)
 
         # El jugador golpea al enemigo
         if check_hit(player, enemy):
